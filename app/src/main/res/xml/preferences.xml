@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/settings"
+        android:key="pref_settings">
+
+        <EditTextPreference
+            android:key="address"
+            android:title="@string/address"
+            android:persistent="true"
+            android:dialogTitle="@string/address"
+            android:dialogMessage="@string/address_message"
+            android:defaultValue="10.0.2.2" />
+
+        <EditTextPreference
+            android:key="port"
+            android:title="@string/port"
+            android:persistent="true"
+            android:dialogTitle="@string/port"
+            android:dialogMessage="@string/port_message"
+            android:defaultValue="4446" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

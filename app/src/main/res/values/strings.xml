@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">VS pascalo chat</string>
+    <string name="username">Username</string>
+    <string name="join_chat">Join chat</string>
+    <string name="settings">Settings</string>
+    <string name="address">Address</string>
+    <string name="address_message">Please enter the chat server\'s IP address</string>
+    <string name="port">Port</string>
+    <string name="port_message">Please enter the chat server\'s port</string>
 </resources>
