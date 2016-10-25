@@ -1,9 +1,11 @@
 package ch.ethz.inf.vs.a3.pascalo.vs_pascalo_chat;
 
 import android.content.Intent;
+import android.nfc.Tag;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +19,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         PreferenceManager.getDefaultSharedPreferences(this);
+
+        findViewById(R.id.main_join_button).setOnClickListener(this);
     }
 
     @Override
@@ -55,6 +59,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 //start activity with the intent
                 startActivity(mIntent);
+                break;
+            default:
+                Log.e("###", "onClick got called with an unexpected view.");
+                finish();
                 break;
         }
     }
