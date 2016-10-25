@@ -11,7 +11,8 @@
             android:persistent="true"
             android:dialogTitle="@string/address"
             android:dialogMessage="@string/address_message"
-            android:defaultValue="10.0.2.2" />
+            android:inputType="number"
+            android:hint="@string/default_ip_address" />
 
         <EditTextPreference
             android:key="port"
@@ -19,7 +20,8 @@
             android:persistent="true"
             android:dialogTitle="@string/port"
             android:dialogMessage="@string/port_message"
-            android:defaultValue="4446" />
+            android:inputType="number"
+            android:hint="@string/default_port" />
 
     </PreferenceCategory>
 
