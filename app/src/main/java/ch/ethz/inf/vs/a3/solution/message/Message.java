@@ -25,13 +25,23 @@ public class Message {
         } catch(Exception e) {e.printStackTrace();}
     }
 
-    /*/// Create from String representing a JSONObject
+    /// Create from String representing a JSONObject
     public Message(String s){
+        this(getJSONRObjectForConstructor(s));
+    }
+
+    /// Completely dumb workaround, but apparently to call one constructor from another the call
+    /// needs to be on the first line and of course may only call static methods
+    private static JSONObject getJSONRObjectForConstructor (String s) {
+        JSONObject jsonObject;
         try {
-            Message(new JSONObject(s));
+            jsonObject = new JSONObject(s);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            jsonObject = new JSONObject();
         }
-        catch (Exception e) { e.printStackTrace();}
-    }*/
+        return jsonObject;
+    }
 
     public void set_header(String username, String uuid, String timestamp, String type){
         header = new MessageHeader(username, uuid, timestamp, type);
