@@ -14,8 +14,14 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.util.UUID;
+
+import ch.ethz.inf.vs.a3.message.MessageTypes;
+import ch.ethz.inf.vs.a3.solution.message.Message;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText mUsernameField;
+    private final String TAG = "Main Activity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,15 +71,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 //get username from textfield
                 String username = mUsernameField.getText().toString();
-                //store username in the intent
                 if (username.equals("")) username = "Mr. NoName";
+
+                //generate uuid
+                String uuid = UUID.randomUUID().toString();
+
+                //store username and uuid in the intent
                 intent.putExtra("username", username);
+                intent.putExtra("uuid", uuid);
+
+                // build register message
+                Message reg_msg = new Message();
+                reg_msg.set_header(username, uuid, "", MessageTypes.REGISTER);
+
+                // attempt sending asynchronously with 5 write attempts
+                Log.d(TAG, "Sending register message:\n" + reg_msg.toString());
+                //TODO
+                //send(reg_msg);
+
+                // FIXME: This should happen after receiving an ACK
 
                 //start activity with the intent
                 startActivity(intent);
                 break;
             default:
-                Log.e("###", "onClick got called with an unexpected view.");
+                Log.e(TAG, "onClick got called with an unexpected view.");
                 finish();
                 break;
         }

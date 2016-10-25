@@ -11,8 +11,8 @@ public class MessageComparator implements Comparator<Message> {
     @Override
     public int compare(Message lhs, Message rhs) {
         // Write your code here
-
-        return 0;
+        //TODO Do actual vector clock comparison instead of lexicographic comparison
+        return lhs.header.timestamp.compareTo(rhs.header.timestamp);
     }
 
 }
