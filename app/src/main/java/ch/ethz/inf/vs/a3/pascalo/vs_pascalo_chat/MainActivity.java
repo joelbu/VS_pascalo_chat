@@ -115,14 +115,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 // attempt sending asynchronously with 5 write attempts
                 Log.d(TAG, "Sending register message:\n" + reg_msg.toString());
-                //TODO
-                //send(reg_msg);
-                attempt_send_retry_five_times(reg_msg, ip, Integer.parseInt(port));
+                new registrationHandler(reg_msg, ip, Integer.parseInt(port), intent).start();
 
-                // FIXME: This should happen after receiving an ACK
-
-                //start activity with the intent
-                startActivity(intent);
                 break;
             default:
                 Log.e(TAG, "onClick got called with an unexpected view.");
@@ -130,17 +124,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-    private class registrationHandler implements Runnable {
+    private class registrationHandler extends Thread {
         private Message m;
         private InetAddress address;
         private int port;
         private boolean success;
         private Intent intent;
-        public void setParameters(Message m, InetAddress address, int port, Intent intent){
-            m =m;
-            address = address;
-            port = port;
-            intent = intent;
+        public registrationHandler(Message m, InetAddress address, int port, Intent intent){
+            this.m =m;
+            this.address = address;
+            this.port = port;
+            this.intent = intent;
         }
 
         @Override
@@ -175,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 e.printStackTrace();
                 success = false;
             }
+            if(success){startActivity(intent);}
         }
     }
 }
