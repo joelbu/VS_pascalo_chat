@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 socket.setSoTimeout(NetworkConsts.SOCKET_TIMEOUT);
 
                 // Prepare data packet
-                byte[] send_buf = m.toString().getBytes();
+                byte[] send_buf = m.toString().getBytes("UTF-8");
                 DatagramPacket packet = new DatagramPacket(send_buf, send_buf.length, address, port);
                 byte[] recv_buf = new byte[NetworkConsts.PAYLOAD_SIZE];
                 DatagramPacket answer = new DatagramPacket(recv_buf, recv_buf.length, address, port);
@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     socket.send(packet);
                     try {
                         socket.receive(answer);
-                        Message ack = new Message( new JSONObject(new String(answer.getData(), 0, answer.getLength())));
+                        Message ack = new Message( new JSONObject(new String(answer.getData(), 0, answer.getLength(),"UTF-8")));
                         wait_for_ack = ack.header.type.equals(MessageTypes.ACK_MESSAGE);
                         success = true;
                     } catch (SocketTimeoutException e){
