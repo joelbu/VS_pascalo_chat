@@ -25,6 +25,14 @@ public class Message {
         } catch(Exception e) {e.printStackTrace();}
     }
 
+    /*/// Create from String representing a JSONObject
+    public Message(String s){
+        try {
+            Message(new JSONObject(s));
+        }
+        catch (Exception e) { e.printStackTrace();}
+    }*/
+
     public void set_header(String username, String uuid, String timestamp, String type){
         header = new MessageHeader(username, uuid, timestamp, type);
     }

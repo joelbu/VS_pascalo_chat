@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.net.DatagramPacket;
@@ -67,6 +68,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 //get IP address from preference
                 String ipAddress = PreferenceManager.getDefaultSharedPreferences(this).getString("address", getString(R.string.default_ip_address));
+                //cast IP address to InetAddress
+                String[] numbers = ipAddress.split("[.]");
+                InetAddress ip;
+                try {
+                    if (numbers.length == 4) {
+                        byte[] chosenIp = new byte[4];
+                        for(int i = 0; i < 4; i++ ){
+                            chosenIp[i] = (byte) Integer.parseInt(numbers[i]);
+                        }
+                        ip = InetAddress.getByAddress(chosenIp);
+                    } else {
+                        //ip = StringToInet( NetworkConsts.SERVER_ADDRESS )
+                        byte[] defaultIp = {10, 0, 2, 2};
+                        ip = InetAddress.getByAddress(defaultIp);
+                    }
+                }
+                catch(Exception e) {
+                    Log.d(TAG, "Could not resolve IP.");
+                    e.printStackTrace();
+                    return;
+                }
+
                 //store IP address in the intent
                 intent.putExtra("address", ipAddress);
 
@@ -94,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG, "Sending register message:\n" + reg_msg.toString());
                 //TODO
                 //send(reg_msg);
+                attempt_send_retry_five_times(reg_msg, ip, Integer.parseInt(port));
 
                 // FIXME: This should happen after receiving an ACK
 
@@ -106,32 +130,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-    private boolean attempt_send_retry_five_times(Message m, InetAddress address, int port){
-        try {
-            // create UDP Socket
-            DatagramSocket socket = new DatagramSocket(port);
-            socket.setSoTimeout(NetworkConsts.SOCKET_TIMEOUT);
+    private class registrationHandler implements Runnable {
+        private Message m;
+        private InetAddress address;
+        private int port;
+        private boolean success;
+        private Intent intent;
+        public void setParameters(Message m, InetAddress address, int port, Intent intent){
+            m =m;
+            address = address;
+            port = port;
+            intent = intent;
+        }
 
-            // Prepare data packet
-            byte[] send_buf = m.toString().getBytes();
-            DatagramPacket packet = new DatagramPacket(send_buf, send_buf.length, address, port);
-            byte[] recv_buf = new byte[NetworkConsts.PAYLOAD_SIZE];
-            DatagramPacket answer = new DatagramPacket(recv_buf, recv_buf.length, address, port);
+        @Override
+        public void run() {
+            try {
+                // create UDP Socket
+                DatagramSocket socket = new DatagramSocket(port);
+                socket.setSoTimeout(NetworkConsts.SOCKET_TIMEOUT);
 
-            // attempt sending the packet
-            boolean wait_for_ack = true;
-            for(int i = 0; i <= 5 &! wait_for_ack; i++ ){
-                socket.send(packet);
-                try {
-                    socket.receive(answer);
-                    Message ack = new Message((String) answer);
-                    wait_for_ack = ack.header.type.equals(MessageTypes.ACK_MESSAGE);
-                } catch (SocketTimeoutException e){
-                    Log.d(TAG, "Receive timeout.");
-                    e.printStackTrace();
+                // Prepare data packet
+                byte[] send_buf = m.toString().getBytes();
+                DatagramPacket packet = new DatagramPacket(send_buf, send_buf.length, address, port);
+                byte[] recv_buf = new byte[NetworkConsts.PAYLOAD_SIZE];
+                DatagramPacket answer = new DatagramPacket(recv_buf, recv_buf.length, address, port);
+
+                // attempt sending the packet
+                boolean wait_for_ack = true;
+                for(int i = 0; wait_for_ack && i <= 5; i++ ){
+                    socket.send(packet);
+                    try {
+                        socket.receive(answer);
+                        Message ack = new Message( new JSONObject(new String(answer.getData(), 0, answer.getLength())));
+                        wait_for_ack = ack.header.type.equals(MessageTypes.ACK_MESSAGE);
+                        success = true;
+                    } catch (SocketTimeoutException e){
+                        Log.d(TAG, "Receive timeout.");
+                        e.printStackTrace();
+                        if (i == 5) success = false;
+                    }
                 }
+            } catch(Exception e) {
+                e.printStackTrace();
+                success = false;
             }
-
-        } catch(Exception e) {e.printStackTrace();}
+        }
     }
 }
