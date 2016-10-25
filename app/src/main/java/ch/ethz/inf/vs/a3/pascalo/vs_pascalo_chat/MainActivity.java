@@ -40,7 +40,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.main_join_button:
-                startActivity(new Intent(getApplicationContext(), ChatActivity.class));
+                //create new intent
+                Intent mIntent = new Intent();
+
+                //get IP address from preference
+                String mIPAddress = PreferenceManager.getDefaultSharedPreferences(this).getString("address", getString(R.string.default_ip_address));
+                //store IP address in the intent
+                mIntent.putExtra("address", mIPAddress);
+
+                //get port from preference
+                String mPort = PreferenceManager.getDefaultSharedPreferences(this).getString("Port", getString(R.string.default_port));
+                //store port in the intent
+                mIntent.putExtra("port", mPort);
+
+                //start activity with the intent
+                startActivity(mIntent, ChatActivity.class);
                 break;
         }
     }

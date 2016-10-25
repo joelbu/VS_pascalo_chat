@@ -7,4 +7,6 @@
     <string name="address_message">Please enter the chat server\'s IP address</string>
     <string name="port">Port</string>
     <string name="port_message">Please enter the chat server\'s port</string>
+    <string name="default_ip_address">10.0.2.2</string>
+    <string name="default_port">4446</string>
 </resources>
