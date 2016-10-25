@@ -1,5 +1,6 @@
 package ch.ethz.inf.vs.a3.solution.message;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -14,6 +15,14 @@ public class Message {
     public Message(){
         header = new MessageHeader("","","","");
         body = new JSONObject();
+    }
+
+    /// Create message from JSON Object
+    public Message(JSONObject obj){
+        try {
+            this.header = new MessageHeader(obj.getJSONObject("header"));
+            this.body = obj.getJSONObject("body");
+        } catch(Exception e) {e.printStackTrace();}
     }
 
     public void set_header(String username, String uuid, String timestamp, String type){
@@ -56,6 +65,13 @@ public class Message {
                 obj.put("type", type);
             } catch(Exception e) {e.printStackTrace();}
             return obj;
+        }
+        /// Create message from JSON Object
+        public MessageHeader(JSONObject obj) throws JSONException {
+                this.username = obj.getString("username");
+                this.uuid = obj.getString("uuid");
+                this.timestamp = obj.getString("timestamp");
+                this.type = obj.getString("type");
         }
     }
 }
