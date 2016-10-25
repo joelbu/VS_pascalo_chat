@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     socket.send(packet);
                     try {
                         socket.receive(answer);
-                        Message ack = new Message( new JSONObject(new String(answer.getData(), 0, answer.getLength(),"UTF-8")));
+                        Message ack = new Message( new String(answer.getData(), 0, answer.getLength(),"UTF-8"));
                         wait_for_ack = ack.header.type.equals(MessageTypes.ACK_MESSAGE);
                         success = true;
                     } catch (SocketTimeoutException e){
