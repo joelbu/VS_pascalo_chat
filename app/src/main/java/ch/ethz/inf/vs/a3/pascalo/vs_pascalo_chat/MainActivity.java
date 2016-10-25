@@ -14,10 +14,16 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import ch.ethz.inf.vs.a3.message.MessageTypes;
 import ch.ethz.inf.vs.a3.solution.message.Message;
+import ch.ethz.inf.vs.a3.udpclient.NetworkConsts;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText mUsernameField;
@@ -99,5 +105,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 finish();
                 break;
         }
+    }
+    private boolean attempt_send_retry_five_times(Message m, InetAddress address, int port){
+        try {
+            // create UDP Socket
+            DatagramSocket socket = new DatagramSocket(port);
+            socket.setSoTimeout(NetworkConsts.SOCKET_TIMEOUT);
+
+            // Prepare data packet
+            byte[] send_buf = m.toString().getBytes();
+            DatagramPacket packet = new DatagramPacket(send_buf, send_buf.length, address, port);
+            byte[] recv_buf = new byte[NetworkConsts.PAYLOAD_SIZE];
+            DatagramPacket answer = new DatagramPacket(recv_buf, recv_buf.length, address, port);
+
+            // attempt sending the packet
+            boolean wait_for_ack = true;
+            for(int i = 0; i <= 5 &! wait_for_ack; i++ ){
+                socket.send(packet);
+                try {
+                    socket.receive(answer);
+                    Message ack = new Message((String) answer);
+                    wait_for_ack = ack.header.type.equals(MessageTypes.ACK_MESSAGE);
+                } catch (SocketTimeoutException e){
+                    Log.d(TAG, "Receive timeout.");
+                    e.printStackTrace();
+                }
+            }
+
+        } catch(Exception e) {e.printStackTrace();}
     }
 }
