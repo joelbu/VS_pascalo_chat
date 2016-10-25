@@ -22,23 +22,29 @@ public class CommunicationHandler {
 
     private final String TAG = "CommunicationHandler";
 
+    // This is the current instance, we only ever allow one to exist at a time
     private static CommunicationHandler mInstance;
 
     public static CommunicationHandler getInstance() {
         return mInstance;
     }
 
+    // This is how we can get an instance externally, construct it with this function, then
+    // get it with the one above
     public static void Initialise(InetAddress address, int port, String username, String uuid) {
         if (mInstance == null) {
             mInstance = new CommunicationHandler(address, port, username, uuid);
         }
     }
 
+    // Cleanup, which also enables us to initialise a new instance (for example with a new username)
     public void destroy() {
         mSocket.close();
         mInstance = null;
     }
 
+    // Constructor is private, we don't want to allow others (us in other classes) to construct
+    // instances any other way than above
     private CommunicationHandler(InetAddress address, int port, String username, String uuid) {
         mAddress = address;
         mPort = port;
@@ -58,27 +64,29 @@ public class CommunicationHandler {
 
         // build register message
         Message reg_msg = new Message();
-        reg_msg.set_header(mUsername, mUUID, "", MessageTypes.REGISTER);
+        reg_msg.set_header(mUsername, mUUID, "{}", MessageTypes.REGISTER);
 
-        // attempt sending asynchronously with 5 write attempts
         Log.d(TAG, "Sending register message:\n" + reg_msg.toString());
 
+        // attempt sending asynchronously with 5 write attempts
         return trySendingAndRetryFiveTimes(reg_msg);
     }
 
     public boolean tryDeregisteringAndRetryFiveTimes() {
         boolean success = false;
 
+        // build deregister message
         Message dereg_msg = new Message();
-        dereg_msg.set_header(mUsername, mUUID, "", MessageTypes.DEREGISTER);
+        dereg_msg.set_header(mUsername, mUUID, "{}", MessageTypes.DEREGISTER);
 
         Log.d(TAG, "Sending deregister message:\n" + dereg_msg.toString());
 
+        // attempt sending asynchronously with 5 write attempts
         return trySendingAndRetryFiveTimes(dereg_msg);
     }
 
     private boolean trySendingAndRetryFiveTimes(Message message) {
-        boolean success = false;
+        boolean received_ack = false;
         try {
 
             // Prepare data packet
@@ -88,25 +96,34 @@ public class CommunicationHandler {
             DatagramPacket answer = new DatagramPacket(recv_buf, recv_buf.length, mAddress, mPort);
 
             // attempt sending the packet
-            boolean wait_for_ack = true;
-            for(int i = 0; wait_for_ack && i <= 5; i++ ){
+            for(int i = 0; !received_ack && i <= 5; i++ ){
                 mSocket.send(packet);
                 try {
+                    // Blocking call unless and until timeout exception occurs
                     mSocket.receive(answer);
-                    Message ack = new Message( new String(answer.getData(), 0, answer.getLength(),"UTF-8"));
-                    wait_for_ack = ack.header.type.equals(MessageTypes.ACK_MESSAGE);
-                    success = true;
+
+                    // Converting the bytes to a string
+                    String receivedMessageString = new String(answer.getData(), 0, answer.getLength(),"UTF-8");
+                    Log.d(TAG, "Received message:\n" + receivedMessageString);
+
+                    // Converting the string to a Message
+                    Message receivedMessage = new Message(receivedMessageString);
+
+                    // Checking the type for ack
+                    received_ack = receivedMessage.header.type.equals(MessageTypes.ACK_MESSAGE);
+
                 } catch (SocketTimeoutException e){
+
                     Log.d(TAG, "Receive timeout.");
                     e.printStackTrace();
-                    if (i == 5) success = false;
                 }
+
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return success;
+        return received_ack;
     }
 }
