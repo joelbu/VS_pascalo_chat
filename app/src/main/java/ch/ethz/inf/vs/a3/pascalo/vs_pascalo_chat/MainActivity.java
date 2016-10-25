@@ -9,8 +9,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    private EditText mUsernameField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         PreferenceManager.getDefaultSharedPreferences(this);
 
+        mUsernameField = (EditText) findViewById(R.id.main_username_field);
         findViewById(R.id.main_join_button).setOnClickListener(this);
     }
 
@@ -45,20 +51,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.main_join_button:
                 //create new intent
-                Intent mIntent = new Intent(getApplicationContext(), ChatActivity.class);
+                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
 
                 //get IP address from preference
-                String mIPAddress = PreferenceManager.getDefaultSharedPreferences(this).getString("address", getString(R.string.default_ip_address));
+                String ipAddress = PreferenceManager.getDefaultSharedPreferences(this).getString("address", getString(R.string.default_ip_address));
                 //store IP address in the intent
-                mIntent.putExtra("address", mIPAddress);
+                intent.putExtra("address", ipAddress);
 
                 //get port from preference
-                String mPort = PreferenceManager.getDefaultSharedPreferences(this).getString("Port", getString(R.string.default_port));
+                String port = PreferenceManager.getDefaultSharedPreferences(this).getString("Port", getString(R.string.default_port));
                 //store port in the intent
-                mIntent.putExtra("port", mPort);
+                intent.putExtra("port", port);
+
+                //get username from textfield
+                String username = mUsernameField.getText().toString();
+                //store username in the intent
+                if (username.equals("")) username = "Mr. NoName";
+                intent.putExtra("username", username);
 
                 //start activity with the intent
-                startActivity(mIntent);
+                startActivity(intent);
                 break;
             default:
                 Log.e("###", "onClick got called with an unexpected view.");
