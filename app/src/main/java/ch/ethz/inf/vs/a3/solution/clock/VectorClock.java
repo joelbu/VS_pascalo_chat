@@ -1,12 +1,12 @@
 package ch.ethz.inf.vs.a3.solution.clock;
 
+import java.util.Map;
+
 import ch.ethz.inf.vs.a3.clock.Clock;
 
-/**
- * Created by Joel on 24.10.2016.
- */
 
 public class VectorClock implements Clock {
+    private Map<Integer, Integer> vector;
 
     @Override
     public void update(Clock other) {
