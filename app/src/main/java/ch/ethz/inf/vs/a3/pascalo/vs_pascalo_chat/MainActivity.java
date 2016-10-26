@@ -29,6 +29,7 @@ import ch.ethz.inf.vs.a3.udpclient.NetworkConsts;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText mUsernameField;
     private final String TAG = "Main Activity";
+    public CommunicationHandler mCommHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,11 +64,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.main_join_button:
-                //create new intent
-                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
 
                 //get IP address from preference
                 String ipAddress = PreferenceManager.getDefaultSharedPreferences(this).getString("address", getString(R.string.default_ip_address));
+
                 //cast IP address to InetAddress
                 String[] numbers = ipAddress.split("[.]");
                 InetAddress ip;
@@ -90,13 +90,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     return;
                 }
 
-                //store IP address in the intent
-                intent.putExtra("address", ipAddress);
-
                 //get port from preference
                 String port = PreferenceManager.getDefaultSharedPreferences(this).getString("Port", getString(R.string.default_port));
-                //store port in the intent
-                intent.putExtra("port", port);
 
                 //get username from textfield
                 String username = mUsernameField.getText().toString();
@@ -105,78 +100,48 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //generate uuid
                 String uuid = UUID.randomUUID().toString();
 
-                //store username and uuid in the intent
-                intent.putExtra("username", username);
-                intent.putExtra("uuid", uuid);
-
-                // build register message
-                Message reg_msg = new Message();
-                reg_msg.set_header(username, uuid, "", MessageTypes.REGISTER);
-
-                // attempt sending asynchronously with 5 write attempts
-                Log.d(TAG, "Sending register message:\n" + reg_msg.toString());
-                Thread t = new registrationHandler(reg_msg, ip, Integer.parseInt(port), intent);
-                t.start();
-                try {
-                    t.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                //TODO: start main activity at this point not from registerThread
-
+                new NetworkThread(ip, Integer.parseInt(port), username, uuid).start();
                 break;
             default:
                 Log.e(TAG, "onClick got called with an unexpected view.");
                 finish();
                 break;
         }
+
     }
-    private class registrationHandler extends Thread {
-        private Message m;
-        private InetAddress address;
-        private int port;
-        private boolean success;
-        private Intent intent;
-        public registrationHandler(Message m, InetAddress address, int port, Intent intent){
-            this.m =m;
-            this.address = address;
-            this.port = port;
-            this.intent = intent;
+
+    public void transitionToChat() {
+        Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+        startActivity(intent);
+    }
+
+    private class NetworkThread extends Thread {
+        private InetAddress mAddress;
+        private int mPort;
+        private String mUsername;
+        private String mUUID;
+
+        public NetworkThread (InetAddress address, int port, String username, String uuid) {
+            mAddress = address;
+            mPort = port;
+            mUsername = username;
+            mUUID = uuid;
         }
 
         @Override
         public void run() {
-            try {
-                // create UDP Socket
-                DatagramSocket socket = new DatagramSocket(port);
-                socket.setSoTimeout(NetworkConsts.SOCKET_TIMEOUT);
+            CommunicationHandler.Initialise(mAddress, mPort, mUsername, mUUID);
+            mCommHandler = CommunicationHandler.getInstance();
+            boolean success = mCommHandler.tryRegisteringAndRetryFiveTimes();
 
-                // Prepare data packet
-                byte[] send_buf = m.toString().getBytes("UTF-8");
-                DatagramPacket packet = new DatagramPacket(send_buf, send_buf.length, address, port);
-                byte[] recv_buf = new byte[NetworkConsts.PAYLOAD_SIZE];
-                DatagramPacket answer = new DatagramPacket(recv_buf, recv_buf.length, address, port);
-
-                // attempt sending the packet
-                boolean wait_for_ack = true;
-                for(int i = 0; wait_for_ack && i <= 5; i++ ){
-                    socket.send(packet);
-                    try {
-                        socket.receive(answer);
-                        Message ack = new Message( new String(answer.getData(), 0, answer.getLength(),"UTF-8"));
-                        wait_for_ack = ack.header.type.equals(MessageTypes.ACK_MESSAGE);
-                        success = true;
-                    } catch (SocketTimeoutException e){
-                        Log.d(TAG, "Receive timeout.");
-                        e.printStackTrace();
-                        if (i == 5) success = false;
-                    }
+            // I'm not sure it matters but it feels better, I don't want the new activity to
+            // somehow run on the network thread or anything
+            if (success) runOnUiThread(new Runnable(){
+                @Override
+                public void run() {
+                    transitionToChat();
                 }
-            } catch(Exception e) {
-                e.printStackTrace();
-                success = false;
-            }
-            if(success){startActivity(intent);}
+            });
         }
     }
 }
