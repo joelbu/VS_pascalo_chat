@@ -115,7 +115,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 // attempt sending asynchronously with 5 write attempts
                 Log.d(TAG, "Sending register message:\n" + reg_msg.toString());
-                new registrationHandler(reg_msg, ip, Integer.parseInt(port), intent).start();
+                Thread t = new registrationHandler(reg_msg, ip, Integer.parseInt(port), intent);
+                t.start();
+                try {
+                    t.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 break;
             default:
