@@ -47,6 +47,11 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 new PriorityQueue<Message>(10,  new MessageComparator());
         //Insert messages to queue like this, sorting is automatic
         //queue.add(m);
+        //Read and remove minimal object in queue like this
+        //while(queue.size > 0) {
+        //  Message msg = queue.remove();
+        //  do something with msg
+        //}
 
     }
 
