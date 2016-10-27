@@ -143,8 +143,6 @@ public class CommunicationHandler {
 
         Log.d(TAG, "Sending retrieveChatLog message:\n" + ret_msg.toString());
 
-
-
         try {
 
             // Prepare data packet
@@ -186,14 +184,7 @@ public class CommunicationHandler {
             e.printStackTrace();
         }
 
-
-
-
-
-
-
-
-        return null;
+        return queue;
     }
 
 

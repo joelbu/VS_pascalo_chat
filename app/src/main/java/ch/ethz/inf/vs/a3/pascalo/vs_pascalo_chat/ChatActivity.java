@@ -2,8 +2,12 @@ package ch.ethz.inf.vs.a3.pascalo.vs_pascalo_chat;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONException;
 
 import java.util.PriorityQueue;
 
@@ -13,6 +17,8 @@ import ch.ethz.inf.vs.a3.solution.message.Message;
 public class ChatActivity extends AppCompatActivity implements View.OnClickListener {
 
     private CommunicationHandler comHandler;
+
+    private String TAG = "ChatActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +50,9 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        Toast.makeText(getApplicationContext(), "Refreshing Chat Log", Toast.LENGTH_LONG).show();
         RetrieveThread tRet = new RetrieveThread();
+        tRet.start();
     }
 
     private class DestroyThread extends Thread {
@@ -55,27 +63,43 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void displayMessages(PriorityQueue<Message> queue){
+    public void displayString(String s){
         TextView display = (TextView) findViewById(R.id.chat_view);
-        //Message msg = queue // getMin
-        // PriorityQueue<Message> q = queue.remove(msg)
-        //display.setText(msg + displayMessages(q));
+
+        display.setText(s);
     }
 
 
     private class RetrieveThread extends Thread {
+
+        private String messageString = "";
+
+
         @Override
         public void run() {
+
+            Log.d(TAG, "RetrieveThread started");
+
             // Create priority queue for messages
             PriorityQueue<Message> queue;
             queue = comHandler.tryRetrieveMessages();
 
+            Log.d(TAG, "messages stored in priority queue");
+
 
             //Read and remove minimal object in queue like this
-            //while(queue.size > 0) {
-            //  Message msg = queue.remove();
-            //  do something with msg
-            //}
+            while(queue.size() > 0){
+                //extragt min element and store it in msg
+                Message msg = queue.poll();
+
+                //  do something with msg
+                try {
+                    messageString = messageString + msg.body.getString("content") + "\n";
+                } catch (JSONException e) {
+                    Log.d(TAG, "unexpected JSON body");
+                    e.printStackTrace();
+                }
+            }
 
 
             if (queue != null) {
@@ -83,7 +107,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 runOnUiThread(new Runnable(){
                     @Override
                     public void run() {
-                        displayMessages(finalQueue);
+                        displayString(messageString);
                     }
                 });
             }
