@@ -8,7 +8,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
+import java.util.PriorityQueue;
 
+import ch.ethz.inf.vs.a3.message.MessageComparator;
 import ch.ethz.inf.vs.a3.message.MessageTypes;
 import ch.ethz.inf.vs.a3.solution.message.Message;
 import ch.ethz.inf.vs.a3.udpclient.NetworkConsts;
@@ -126,4 +128,73 @@ public class CommunicationHandler {
 
         return received_ack;
     }
+
+
+    public PriorityQueue<Message> tryRetrieveMessages() {
+
+        boolean timeout = false;
+        // Create priority queue for messages: with initial capacity 10
+        PriorityQueue<Message> queue =
+                new PriorityQueue<Message>(10,  new MessageComparator());
+
+        // build retrive message
+        Message ret_msg = new Message();
+        ret_msg.set_header(mUsername, mUUID, "{}", MessageTypes.RETRIEVE_CHAT_LOG);
+
+        Log.d(TAG, "Sending retrieveChatLog message:\n" + ret_msg.toString());
+
+
+
+        try {
+
+            // Prepare data packet
+            byte[] send_buf = ret_msg.toString().getBytes("UTF-8");
+            DatagramPacket packet = new DatagramPacket(send_buf, send_buf.length, mAddress, mPort);
+            byte[] recv_buf = new byte[NetworkConsts.PAYLOAD_SIZE];
+            DatagramPacket answer = new DatagramPacket(recv_buf, recv_buf.length, mAddress, mPort);
+
+            // attempt sending the packet
+            mSocket.send(packet);
+
+
+            while (!timeout) {
+                try {
+                    // Blocking call unless and until timeout exception occurs
+                    mSocket.receive(answer);
+
+                    // Converting the bytes to a string
+                    String receivedMessageString = new String(answer.getData(), 0, answer.getLength(), "UTF-8");
+                    Log.d(TAG, "Received message:\n" + receivedMessageString);
+
+                    // Converting the string to a Message
+                    Message receivedMessage = new Message(receivedMessageString);
+
+                    //Insert messages to queue like this, sorting is automatic
+                    queue.add(receivedMessage);
+
+
+                } catch (SocketTimeoutException e) {
+                    timeout = true;
+                    Log.d(TAG, "Receive timeout.");
+                    e.printStackTrace();
+                }
+            }
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
+
+
+
+
+
+        return null;
+    }
+
+
 }

@@ -11,11 +11,14 @@ import ch.ethz.inf.vs.a3.solution.message.Message;
 
 public class ChatActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private CommunicationHandler comHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        comHandler = CommunicationHandler.getInstance();
 
 
 
@@ -27,10 +30,10 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onDestroy() {
 
-        NetworkThread networkThread = new NetworkThread();
-        networkThread.start();
+        DestroyThread destroyThread = new DestroyThread();
+        destroyThread.start();
         try {
-            networkThread.join();
+            destroyThread.join();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -41,12 +44,11 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
 
+        // Create priority queue for messages
+        PriorityQueue<Message> queue;
 
-        // Create priority queue for messages: with initial capacity 10
-        PriorityQueue<Message> queue =
-                new PriorityQueue<Message>(10,  new MessageComparator());
-        //Insert messages to queue like this, sorting is automatic
-        //queue.add(m);
+        queue = comHandler.tryRetrieveMessages();
+
         //Read and remove minimal object in queue like this
         //while(queue.size > 0) {
         //  Message msg = queue.remove();
@@ -55,12 +57,20 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private class NetworkThread extends Thread {
+    private class DestroyThread extends Thread {
         @Override
         public void run() {
-            CommunicationHandler comHandler = CommunicationHandler.getInstance();
             comHandler.tryDeregisteringAndRetryFiveTimes();
             comHandler.destroy();
         }
+    }
+
+
+    private class RegisterThread extends Thread {
+        @Override
+        public void run() {
+
+        }
+
     }
 }
