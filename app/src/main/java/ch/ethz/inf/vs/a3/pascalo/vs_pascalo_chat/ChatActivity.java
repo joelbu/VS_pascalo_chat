@@ -3,6 +3,7 @@ package ch.ethz.inf.vs.a3.pascalo.vs_pascalo_chat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.PriorityQueue;
 
@@ -55,7 +56,10 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void displayMessages(PriorityQueue<Message> queue){
-
+        TextView display = (TextView) findViewById(R.id.chat_view);
+        //Message msg = queue // getMin
+        // PriorityQueue<Message> q = queue.remove(msg)
+        //display.setText(msg + displayMessages(q));
     }
 
 
