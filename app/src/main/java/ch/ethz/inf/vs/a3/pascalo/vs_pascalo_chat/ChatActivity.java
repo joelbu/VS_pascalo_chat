@@ -4,6 +4,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import java.util.PriorityQueue;
+
+import ch.ethz.inf.vs.a3.message.MessageComparator;
+import ch.ethz.inf.vs.a3.solution.message.Message;
+
 public class ChatActivity extends AppCompatActivity implements View.OnClickListener {
 
     @Override
@@ -35,6 +40,13 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+
+
+        // Create priority queue for messages: with initial capacity 10
+        PriorityQueue<Message> queue =
+                new PriorityQueue<Message>(10,  new MessageComparator());
+        //Insert messages to queue like this, sorting is automatic
+        //queue.add(m);
 
     }
 
