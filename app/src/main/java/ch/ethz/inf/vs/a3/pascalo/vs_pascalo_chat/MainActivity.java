@@ -66,7 +66,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.main_join_button:
 
                 //get IP address from preference
-                String ipAddress = PreferenceManager.getDefaultSharedPreferences(this).getString("address", getString(R.string.default_ip_address));
+                String ipAddress = PreferenceManager.getDefaultSharedPreferences(this)
+                        .getString("address", getString(R.string.default_ip_address));
 
                 //cast IP address to InetAddress
                 String[] numbers = ipAddress.split("[.]");
@@ -91,7 +92,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 //get port from preference
-                String port = PreferenceManager.getDefaultSharedPreferences(this).getString("Port", getString(R.string.default_port));
+                String port = PreferenceManager.getDefaultSharedPreferences(this)
+                        .getString("Port", getString(R.string.default_port));
 
                 //get username from textfield
                 String username = mUsernameField.getText().toString();
