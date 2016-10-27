@@ -10,4 +10,19 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="ch.ethz.inf.vs.a3.pascalo.vs_pascalo_chat.ChatActivity">
 
+    <Button
+        android:text="@string/refresh_button_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/refresh_button" />
+
+    <TextView
+        android:text="@string/chat_view_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/refresh_button"
+        android:layout_alignParentStart="true"
+        android:id="@+id/chat_view" />
 </RelativeLayout>

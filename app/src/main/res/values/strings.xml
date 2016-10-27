@@ -9,4 +9,6 @@
     <string name="port_message">Please enter the chat server\'s port</string>
     <string name="default_ip_address">10.0.2.2</string>
     <string name="default_port">4446</string>
+    <string name="refresh_button_text">refresh chat log</string>
+    <string name="chat_view_text">Refresh to display messages on the server.</string>
 </resources>
