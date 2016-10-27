@@ -43,18 +43,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-
-        // Create priority queue for messages
-        PriorityQueue<Message> queue;
-
-        queue = comHandler.tryRetrieveMessages();
-
-        //Read and remove minimal object in queue like this
-        //while(queue.size > 0) {
-        //  Message msg = queue.remove();
-        //  do something with msg
-        //}
-
+        RetrieveThread tRet = new RetrieveThread();
     }
 
     private class DestroyThread extends Thread {
@@ -65,11 +54,35 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    public void displayMessages(PriorityQueue<Message> queue){
 
-    private class RegisterThread extends Thread {
+    }
+
+
+    private class RetrieveThread extends Thread {
         @Override
         public void run() {
+            // Create priority queue for messages
+            PriorityQueue<Message> queue;
+            queue = comHandler.tryRetrieveMessages();
 
+
+            //Read and remove minimal object in queue like this
+            //while(queue.size > 0) {
+            //  Message msg = queue.remove();
+            //  do something with msg
+            //}
+
+
+            if (queue != null) {
+                final PriorityQueue<Message> finalQueue = queue;
+                runOnUiThread(new Runnable(){
+                    @Override
+                    public void run() {
+                        displayMessages(finalQueue);
+                    }
+                });
+            }
         }
 
     }
