@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 
-import java.util.PriorityQueue;
+import ch.ethz.inf.vs.a3.queue.PriorityQueue;
 
 import ch.ethz.inf.vs.a3.message.MessageComparator;
 import ch.ethz.inf.vs.a3.solution.message.Message;
@@ -91,7 +91,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             while(queue.size() > 0){
                 //extragt min element and store it in msg
                 Message msg = queue.poll();
-
+                Log.d(TAG, "Adding message to display string, following timestamp: " + msg.header.timestamp.toString());
                 //  do something with msg
                 try {
                     messageString = messageString + msg.body.getString("content") + "\n";
@@ -103,7 +103,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
 
             if (queue != null) {
-                final PriorityQueue<Message> finalQueue = queue;
                 runOnUiThread(new Runnable(){
                     @Override
                     public void run() {

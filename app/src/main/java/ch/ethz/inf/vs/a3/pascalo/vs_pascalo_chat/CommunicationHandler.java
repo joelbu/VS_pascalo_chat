@@ -8,8 +8,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
-import java.util.PriorityQueue;
 
+import ch.ethz.inf.vs.a3.queue.PriorityQueue;
 import ch.ethz.inf.vs.a3.message.MessageComparator;
 import ch.ethz.inf.vs.a3.message.MessageTypes;
 import ch.ethz.inf.vs.a3.solution.message.Message;
@@ -135,7 +135,7 @@ public class CommunicationHandler {
         boolean timeout = false;
         // Create priority queue for messages: with initial capacity 10
         PriorityQueue<Message> queue =
-                new PriorityQueue<Message>(10,  new MessageComparator());
+                new PriorityQueue<Message>(new MessageComparator());
 
         // build retrive message
         Message ret_msg = new Message();
@@ -174,7 +174,6 @@ public class CommunicationHandler {
                 } catch (SocketTimeoutException e) {
                     timeout = true;
                     Log.d(TAG, "Receive timeout.");
-                    e.printStackTrace();
                 }
             }
 
